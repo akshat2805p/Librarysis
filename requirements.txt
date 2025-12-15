@@ -1,5 +1,5 @@
 flask
-flask-mysqldb
+pymysql
 python-dotenv
 werkzeug
 email_validator
