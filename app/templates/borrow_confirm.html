@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="confirm-container">
+    <div class="confirm-card">
+        <h2>Confirm Borrowing</h2>
+
+        <div class="book-summary">
+            <img src="{{ book.image_url }}" alt="{{ book.title }}" class="confirm-thumb">
+            <div class="details">
+                <h3>{{ book.title }}</h3>
+                <p><strong>Author:</strong> {{ book.author_name }}</p>
+                <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+            </div>
+        </div>
+
+        <div class="borrow-details">
+            <p><strong>Borrow Date:</strong> {{ today }}</p>
+            <p><strong>Due Date:</strong> {{ due_date }}</p>
+        </div>
+
+        <form action="{{ url_for('main.process_borrow', book_id=book.book_id) }}" method="POST">
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" required> I agree to the library terms.
+                </label>
+            </div>
+
+            <div class="actions">
+                <a href="{{ url_for('main.catalog') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-success">Confirm Borrow</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

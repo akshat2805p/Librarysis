@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="catalog-header">
+    <h2>Book Catalog</h2>
+    <form action="{{ url_for('main.catalog') }}" method="GET" class="search-form">
+        <input type="text" name="q" placeholder="Search by title..." value="{{ search_query }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+<div class="catalog-grid">
+    {% for book in books %}
+    <div class="catalog-card">
+        <div class="card-image">
+            <img src="{{ book.image_url }}" alt="{{ book.title }}">
+        </div>
+        <div class="card-content">
+            <h3>{{ book.title }}</h3>
+            <p class="author">By {{ book.author_name }}</p>
+            <p class="meta">{{ book.publication_year }} • {{ book.available_copies }} Available</p>
+            <div class="card-actions">
+                {% if book.available_copies > 0 %}
+                <a href="{{ url_for('main.confirm_borrow', book_id=book.book_id) }}"
+                    class="btn btn-primary btn-block">Borrow</a>
+                {% else %}
+                <button class="btn btn-disabled btn-block" disabled>Out of Stock</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>No books found.</p>
+    {% endfor %}
+</div>
+
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="{{ url_for('main.catalog', page=page-1, q=search_query) }}" class="btn btn-secondary">&laquo; Previous</a>
+    {% endif %}
+    <span class="current-page">Page {{ page }}</span>
+    {% if has_next %}
+    <a href="{{ url_for('main.catalog', page=page+1, q=search_query) }}" class="btn btn-secondary">Next &raquo;</a>
+    {% endif %}
+</div>
+{% endblock %}

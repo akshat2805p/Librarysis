@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1>Welcome, {{ user_info.username }}!</h1>
+        <p class="subtitle">{{ user_info.email }}</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Borrowed Books</h3>
+            <div class="value">{{ my_books|length if my_books else 0 }}</div>
+            <div class="chart-bars">
+                <div class="bar" style="height: 40%"></div>
+                <div class="bar" style="height: 70%"></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 90%"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Pending Fines</h3>
+            <div class="value">₹0.00</div>
+            <div class="trend">No active fines</div>
+            <div class="chart-bars">
+                <div class="bar" style="height: 20%; background: #ef4444;"></div>
+                <div class="bar" style="height: 30%; background: #ef4444;"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>Library Status</h3>
+            <div class="value">Active</div>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">{{ user_info.email }}</p>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="dashboard-header-card">
+        <div class="fine-notice" style="width: 100%">
+            <h4>⚠️ Library Policy</h4>
+            <p>Please return books on time. Late returns will incur a fine of <strong>₹10.00 per day</strong>.</p>
+        </div>
+    </div>
+
+    {% if is_admin %}
+    <div class="card">
+        <h3>Add New Book</h3>
+        <form action="{{ url_for('main.add_book') }}" method="POST" class="inline-form">
+            <input type="text" name="title" placeholder="Book Title" required>
+            <input type="text" name="isbn" placeholder="ISBN" required>
+            <input type="number" name="copies" placeholder="Copies" value="1" min="1" required>
+            <input type="number" name="year" placeholder="Year" required>
+            <button type="submit" class="btn btn-primary">Add Book</button>
+        </form>
+    </div>
+
+    <div class="card" style="margin-top: 2rem;">
+        <h3>Recent Transactions</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Book</th>
+                    <th>Borrowed</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td>{{ t.transaction_id }}</td>
+                    <td>{{ t.username }}</td>
+                    <td>{{ t.title }}</td>
+                    <td>{{ t.borrow_date }}</td>
+                    <td><span class="status {{ t.status }}">{{ t.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card">
+        <h3>My Borrowed Books</h3>
+        {% if my_books %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book Details</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in my_books %}
+                <tr>
+                    <td>
+                        <div class="book-cell">
+                            <img src="{{ b.image_url }}" alt="cover" class="mini-thumb">
+                            <div>
+                                <strong>{{ b.title }}</strong><br>
+                                <span style="font-size:0.8rem; color:#aaa;">Borrowed: {{ b.borrow_date }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="{% if b.fine_amount > 0 %}text-danger{% endif %}">{{ b.due_date }}</span>
+                    </td>
+                    <td>
+                        <span class="status issued">Issued</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('main.return_book_route', transaction_id=b.transaction_id) }}"
+                            class="btn btn-sm btn-danger">Return</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <p>No books currently borrowed.</p>
+            <a href="{{ url_for('main.catalog') }}" class="btn btn-primary">Browse Catalog</a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="{% if session.get('user_id') %}has-sidebar{% endif %}">
+
+    {% if session.get('user_id') %}
+    <!-- Sidebar for Logged In Users -->
+    <div class="sidebar">
+        <a href="/" class="logo">LibrarySys</a>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('main.dashboard') }}" class="active">Dashboard</a></li>
+            <li><a href="{{ url_for('main.catalog') }}">Books Catalog</a></li>
+            <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
+        </ul>
+    </div>
+    {% else %}
+    <!-- Top Navbar for Guests -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">LibrarySys</a>
+            <ul class="nav-links">
+                <!-- <li><a href="{{ url_for('main.catalog') }}">Books</a></li> -->
+                <li><a href="{{ url_for('main.login') }}">Login</a></li>
+                <li><a href="{{ url_for('main.register') }}">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="{% if session.get('user_id') %}main-content-wrapper{% else %}container main-content{% endif %}">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% if not session.get('user_id') %}
+    <footer>
+        <p>&copy; 2025 Online Library Management System</p>
+    </footer>
+    {% endif %}
+</body>
+
+</html>

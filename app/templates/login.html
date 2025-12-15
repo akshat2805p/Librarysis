@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card modern-login">
+        <h1 class="logo-text">LibrarySys</h1>
+        <h3>Welcome Back!</h3>
+        <p class="subtitle">Ready to continue reading? Log in now!</p>
+
+        <form method="POST" action="{{ url_for('main.login') }}">
+
+            <div class="form-group">
+                <label for="email">Username or Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-input">
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <label class="show-password">
+                    <input type="checkbox" onclick="togglePassword()"> Show Password
+                </label>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox"> Remember me
+                </label>
+                <a href="{{ url_for('main.forgot_password') }}" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Login</button>
+        </form>
+
+        <div class="divider">
+            <span>Or</span>
+        </div>
+
+        <div class="social-login">
+            <button type="button" class="social-btn google" onclick="signInWithGoogle()">G</button>
+        </div>
+
+        <p class="auth-link">Don't have an account? <a href="{{ url_for('main.register') }}">Sign Up</a></p>
+    </div>
+</div>
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup }
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyChcloR_7gpOHeW4PvYx7qvgFZoc3bEYI8",
+        authDomain: "librarysys-9b39d.firebaseapp.com",
+        projectId: "librarysys-9b39d",
+        storageBucket: "librarysys-9b39d.firebasestorage.app",
+        messagingSenderId: "488580350884",
+        appId: "1:488580350884:web:93b7f38947085697b93731",
+        measurementId: "G-802FYJLVPH"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.signInWithGoogle = () => {
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                const user = result.user;
+                handleServerLogin(user);
+            }).catch((error) => {
+                console.error("Google Login Error:", error);
+                alert("Google Login Failed: " + error.message);
+            });
+    };
+
+    function handleServerLogin(user) {
+        fetch("{{ url_for('main.firebase_login') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email: user.email,
+                displayName: user.displayName,
+                uid: user.uid
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect;
+                } else {
+                    alert("Server Login Failed: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Server Error:", error);
+                alert("Server Error. Check console.");
+            });
+    }
+</script>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+        } else {
+            passwordInput.type = 'password';
+        }
+    }
+</script>
+{% endblock %}
